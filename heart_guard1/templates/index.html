@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HeartGuard AI | Medical Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+/* =====================
+   GLOBAL DESIGN SYSTEM
+===================== */
+
+body{
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(180deg,#f8fbff,#eef6ff);
+    transition:0.4s ease;
+}
+
+/* DARK MODE */
+.dark-mode{
+    background:#0f172a;
+    color:white;
+}
+.dark-mode .dashboard-card,
+.dark-mode .stat-card{
+    background:#1e293b;
+    color:white;
+}
+.dark-mode .sidebar{
+    background:#0f172a;
+}
+
+/* =====================
+   SIDEBAR
+===================== */
+
+.app-layout{
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:240px;
+    background:linear-gradient(180deg,#1d3557,#2c5282);
+    color:white;
+    padding:30px 20px;
+    box-shadow:5px 0 25px rgba(0,0,0,0.05);
+}
+
+.sidebar-brand{
+    font-size:20px;
+    font-weight:700;
+    margin-bottom:40px;
+}
+
+.sidebar ul{
+    list-style:none;
+    padding:0;
+}
+
+.sidebar ul li{
+    margin-bottom:20px;
+}
+
+.sidebar ul li a{
+    text-decoration:none;
+    color:white;
+    opacity:0.9;
+    transition:0.3s;
+}
+
+.sidebar ul li a:hover{
+    opacity:1;
+    padding-left:5px;
+}
+
+/* =====================
+   MAIN CONTENT
+===================== */
+
+.main-content{
+    flex:1;
+    padding:40px;
+}
+
+/* =====================
+   GLASS HERO
+===================== */
+
+.hero-glass{
+    background:rgba(255,255,255,0.6);
+    backdrop-filter:blur(20px);
+    border-radius:20px;
+    padding:40px;
+    margin-bottom:30px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.05);
+    animation:fadeUp 1s ease;
+}
+
+.hero-glass h1{
+    font-weight:700;
+}
+
+@keyframes fadeUp{
+    from{opacity:0;transform:translateY(30px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+/* =====================
+   STATS CARDS
+===================== */
+
+.stat-card{
+    border-radius:18px;
+    padding:25px;
+    color:white;
+    transition:0.3s ease;
+}
+
+.stat-card:nth-child(1){
+    background:linear-gradient(135deg,#457b9d,#1d3557);
+}
+.stat-card:nth-child(2){
+    background:linear-gradient(135deg,#2ec4b6,#1b9aaa);
+}
+.stat-card:nth-child(3){
+    background:linear-gradient(135deg,#e63946,#c1121f);
+}
+
+.stat-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 15px 35px rgba(0,0,0,0.15);
+}
+
+/* =====================
+   DASHBOARD CARDS
+===================== */
+
+.dashboard-card{
+    background:white;
+    border-radius:20px;
+    padding:30px;
+    box-shadow:0 15px 40px rgba(29,53,87,0.08);
+    border-top:4px solid #2ec4b6;
+    transition:0.3s ease;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-4px);
+}
+
+/* =====================
+   FORM
+===================== */
+
+.form-control, .form-select{
+    border-radius:14px;
+    border:1px solid #dbe7f5;
+    transition:0.3s ease;
+}
+
+.form-control:focus,
+.form-select:focus{
+    border-color:#2ec4b6;
+    box-shadow:0 0 12px rgba(46,196,182,0.35);
+}
+
+/* =====================
+   BUTTON
+===================== */
+
+.predict-btn{
+    background:linear-gradient(90deg,#e63946,#ff6b6b);
+    border:none;
+    border-radius:30px;
+    padding:12px 35px;
+    color:white;
+    font-weight:600;
+    transition:0.3s ease;
+}
+
+.predict-btn:hover{
+    transform:scale(1.05);
+    box-shadow:0 10px 25px rgba(230,57,70,0.3);
+}
+
+/* =====================
+   TABLE
+===================== */
+
+.table thead{
+    background:#1d3557;
+    color:white;
+}
+
+.table tbody tr:hover{
+    background:rgba(29,53,87,0.05);
+}
+
+.risk-high{
+    color:#c1121f;
+    font-weight:600;
+}
+.risk-low{
+    color:#2a9d8f;
+    font-weight:600;
+}
+
+/* =====================
+   DARK MODE TOGGLE
+===================== */
+
+.theme-toggle{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    background:#1d3557;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:30px;
+    cursor:pointer;
+}
+
+.chatbot-button{
+position:fixed;
+bottom:25px;
+left:25px;
+background:#e63946;
+color:white;
+border:none;
+padding:12px 18px;
+border-radius:30px;
+cursor:pointer;
+box-shadow:0 8px 20px rgba(0,0,0,0.25);
+z-index:999;
+}
+
+.chatbot-button{
+animation:floatChat 2.5s infinite ease-in-out;
+}
+
+@keyframes floatChat{
+0%{transform:translateY(0);}
+50%{transform:translateY(-6px);}
+100%{transform:translateY(0);}
+}
+
+.chatbot-box{
+display:none;
+position:fixed;
+bottom:90px;
+left:25px;
+width:320px;
+background:white;
+border-radius:12px;
+box-shadow:0 8px 25px rgba(0,0,0,0.25);
+z-index:999;
+}
+
+.chat-header{
+background:#e63946;
+color:white;
+padding:10px;
+font-weight:bold;
+}
+
+.chat-messages{
+height:250px;
+overflow-y:auto;
+padding:10px;
+}
+
+.chat-input{
+display:flex;
+}
+
+.chat-input input{
+flex:1;
+border:none;
+padding:10px;
+}
+
+.chat-input button{
+background:#e63946;
+color:white;
+border:none;
+padding:10px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg py-3">
+<div class="container">
+    <div class="brand">
+        <h1><span>❤️</span> HeartGuard AI </h1>
+    </div>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+        <span class="text-muted">
+            Welcome, <strong>{{ current_user.username }}</strong>
+        </span>
+        <a href="/profile" class="btn btn-outline-primary">Profile</a>
+        <a href="/admin" class="btn btn-outline-dark">Admin</a>
+        <a href="/logout" class="btn btn-danger">Logout</a>
+    </div>
+</div>
+</nav>
+
+<div class="container mt-4 fade-in">
+
+<!-- ===== STATS SECTION ===== -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h6>Total Predictions</h6>
+            <h3>{{ predictions|length }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h6>Last Risk Level</h6>
+            <h3>
+            {% if predictions %}
+                {{ predictions[-1].result }}
+            {% else %}
+                ---
+            {% endif %}
+            </h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h6>Latest Probability</h6>
+            <h3>
+            {% if predictions %}
+                {{ "%.0f"|format(predictions[-1].probability) }}%
+            {% else %}
+                ---
+            {% endif %}
+            </h3>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+
+<!-- PREDICTION FORM -->
+<div class="col-lg-5 mb-4">
+<div class="dashboard-card">
+<h5 class="mb-3">New Prediction</h5>
+
+<form action="/predict" method="POST">
+
+<input type="number" name="age" class="form-control mb-2" placeholder="Age" required>
+<select name="sex" class="form-select mb-2" required>
+<option value="">Gender</option>
+<option value="M">Male</option>
+<option value="F">Female</option>
+</select>
+
+<input type="number" name="resting_bp" class="form-control mb-2" placeholder="Resting BP" required>
+<input type="number" name="cholesterol" class="form-control mb-2" placeholder="Cholesterol" required>
+<input type="number" name="max_hr" class="form-control mb-2" placeholder="Max HR" required>
+
+<select name="chest_pain" class="form-select mb-2" required>
+<option value="">Chest Pain</option>
+<option value="ATA">ATA</option>
+<option value="NAP">NAP</option>
+<option value="TA">TA</option>
+<option value="ASY">ASY</option>
+</select>
+
+<select name="fasting_bs" class="form-select mb-2" required>
+<option value="">Fasting BS</option>
+<option value="0">No</option>
+<option value="1">Yes</option>
+</select>
+
+<select name="resting_ecg" class="form-select mb-2" required>
+<option value="">Resting ECG</option>
+<option value="Normal">Normal</option>
+<option value="ST">ST</option>
+<option value="LVH">LVH</option>
+</select>
+
+<select name="exercise_angina" class="form-select mb-2" required>
+<option value="">Exercise Angina</option>
+<option value="Y">Yes</option>
+<option value="N">No</option>
+</select>
+
+<input type="number" step="0.1" name="oldpeak" class="form-control mb-2" placeholder="Oldpeak" required>
+
+<select name="st_slope" class="form-select mb-3" required>
+<option value="">ST Slope</option>
+<option value="Up">Up</option>
+<option value="Flat">Flat</option>
+<option value="Down">Down</option>
+</select>
+
+<div class="text-center">
+<button type="submit" class="predict-btn">Predict Risk</button>
+</div>
+
+</form>
+</div>
+</div>
+
+<!-- HISTORY -->
+<div class="col-lg-7">
+<div class="dashboard-card">
+<h5 class="mb-3">Prediction History</h5>
+
+{% if predictions %}
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+<thead>
+<tr>
+<th>Age</th>
+<th>Result</th>
+<th>Probability</th>
+<th>Suggestion</th>
+<th>Plan</th>
+</tr>
+</thead>
+<tbody>
+{% for p in predictions %}
+<tr>
+<td>{{ p.age }}</td>
+
+<td class="{% if p.result == 'High Risk' %}risk-high{% else %}risk-low{% endif %}">
+    {{ p.result }}
+</td>
+
+<td>{{ "%.2f"|format(p.probability) }}%</td>
+
+<td>
+    <a href="{{ url_for('view_suggestion', id=p.id) }}" 
+       class="btn btn-sm btn-outline-primary">
+       View Plan
+    </a>
+
+    <a href="{{ url_for('delete_suggestion', id=p.id) }}" 
+       class="btn btn-sm btn-outline-warning">
+       Delete Plan
+    </a>
+</td>
+
+<td>
+    <a href="{{ url_for('delete_prediction', id=p.id) }}" 
+       class="btn btn-sm btn-outline-danger">
+       Delete
+    </a>
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<canvas id="riskChart" class="mt-4"></canvas>
+
+<!-- Risk Gauge -->
+<div class="gauge-wrapper">
+<svg width="150" height="150">
+<circle cx="75" cy="75" r="65" stroke="#eee" stroke-width="12" fill="none"/>
+<circle cx="75" cy="75" r="65"
+stroke="#ff4b2b"
+stroke-width="12"
+fill="none"
+stroke-dasharray="408"
+stroke-dashoffset="{{ 408 - (408 * predictions[-1].probability / 100) }}"
+style="transition:stroke-dashoffset 1s ease;"/>
+</svg>
+<div class="gauge-text">
+{{ "%.0f"|format(predictions[-1].probability) }}%
+</div>
+</div>
+
+{% else %}
+<p class="text-muted">No predictions yet.</p>
+{% endif %}
+
+<a href="/delete_all" class="btn btn-outline-warning mt-3">
+Delete All History
+</a>
+
+</div>
+</div>
+
+</div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+{% if predictions %}
+const ctx = document.getElementById('riskChart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [{% for p in predictions %}"{{ loop.index }}",{% endfor %}],
+        datasets: [{
+            label: 'Risk Probability',
+            data: [{% for p in predictions %}{{ p.probability }},{% endfor %}],
+            borderColor: '#e63946',
+            backgroundColor: 'rgba(230,57,70,0.1)',
+            tension:0.4,
+            fill:true
+        }]
+    },
+    options:{
+        animation:true,
+        responsive:true,
+        plugins:{legend:{display:false}}
+    }
+});
+{% endif %}
+</script>
+<button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+
+<script>
+function toggleTheme(){
+    document.body.classList.toggle("dark-mode");
+}
+</script>
+
+
+<!-- AI Chatbot Button -->
+
+<button id="chatbotBtn" class="chatbot-button">
+💬 AI Health Assistant
+</button>
+
+<div id="chatbotBox" class="chatbot-box">
+
+<div class="chat-header">
+HeartGuard AI Doctor
+</div>
+
+<div id="chatMessages" class="chat-messages"></div>
+
+<div class="chat-input">
+
+<input id="userInput" type="text" placeholder="Ask about heart health...">
+
+<button onclick="sendMessage()">Send</button>
+
+</div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+const chatbotBtn = document.getElementById("chatbotBtn");
+const chatbotBox = document.getElementById("chatbotBox");
+
+if(chatbotBtn){
+
+chatbotBtn.onclick = function(){
+
+chatbotBox.style.display =
+chatbotBox.style.display === "block" ? "none" : "block";
+
+}
+
+}
+
+});
+
+function sendMessage(){
+
+let input = document.getElementById("userInput");
+let message = input.value.trim();
+
+if(!message) return;
+
+let chat = document.getElementById("chatMessages");
+
+chat.innerHTML += "<div><b>You:</b> "+message+"</div>";
+
+fetch("/chatbot",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({message:message})
+})
+
+.then(response => {
+
+if(!response.ok){
+throw new Error("Server error");
+}
+
+return response.json();
+
+})
+
+.then(data=>{
+
+chat.innerHTML += "<div><b>AI:</b> "+data.reply+"</div>";
+
+chat.scrollTop = chat.scrollHeight;
+
+})
+
+.catch(error => {
+
+chat.innerHTML += "<div><b>AI:</b> Server error. Try again later.</div>";
+
+console.error(error);
+
+});
+
+input.value="";
+
+}
+
+</script>
+
+
+</body>
+</html>

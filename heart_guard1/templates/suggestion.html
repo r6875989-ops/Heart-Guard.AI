@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<title>AI Health Recommendation</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+/* ================= BODY ================= */
+
+body{
+font-family:'Poppins',sans-serif;
+background:linear-gradient(135deg,#f0f9ff,#eef2ff);
+min-height:100vh;
+}
+
+/* ================= MAIN CARD ================= */
+
+.medical-card{
+background:white;
+border-radius:25px;
+padding:40px;
+box-shadow:0 25px 60px rgba(0,0,0,0.08);
+border-left:8px solid #06b6d4;
+animation:fadeIn 0.8s ease;
+}
+
+.high{
+border-left-color:#ef4444;
+}
+
+.low{
+border-left-color:#10b981;
+}
+
+/* ================= ECG MONITOR ================= */
+
+.ecg-monitor{
+background:linear-gradient(135deg,#0f172a,#1e293b);
+border-radius:20px;
+padding:20px;
+box-shadow:0 15px 40px rgba(0,0,0,0.25);
+color:white;
+}
+
+.monitor-header{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:10px;
+font-weight:600;
+}
+
+.heart-icon{
+font-size:24px;
+animation:heartbeat 1s infinite;
+}
+
+@keyframes heartbeat{
+0%{transform:scale(1)}
+25%{transform:scale(1.2)}
+50%{transform:scale(1)}
+75%{transform:scale(1.25)}
+100%{transform:scale(1)}
+}
+
+.ecg-wrapper{
+width:100%;
+height:100px;
+overflow:hidden;
+}
+
+.ecg-svg{
+width:100%;
+height:100%;
+}
+
+.ecg-line{
+fill:none;
+stroke:#22c55e;
+stroke-width:3;
+stroke-dasharray:800;
+stroke-dashoffset:800;
+animation:ecgMove 2.5s linear infinite;
+}
+
+@keyframes ecgMove{
+to{stroke-dashoffset:0}
+}
+
+/* ================= RISK METER ================= */
+
+.risk-meter svg{
+transform:rotate(-90deg);
+}
+
+circle{
+stroke-linecap:round;
+}
+
+.text-danger{
+font-weight:600;
+}
+
+.text-success{
+font-weight:600;
+}
+
+/* ================= SCORE CARDS ================= */
+
+.score-box{
+background:linear-gradient(135deg,#f1f5f9,#ffffff);
+border-radius:18px;
+padding:25px;
+box-shadow:0 10px 30px rgba(0,0,0,0.05);
+transition:0.3s;
+}
+
+.score-box:hover{
+transform:translateY(-5px);
+box-shadow:0 20px 40px rgba(0,0,0,0.08);
+}
+
+.score-box h3{
+font-size:28px;
+font-weight:700;
+}
+
+/* ================= PLAN CARD ================= */
+
+.plan-card{
+background:linear-gradient(135deg,#f8fafc,#ffffff);
+border-radius:18px;
+padding:25px;
+box-shadow:0 10px 30px rgba(0,0,0,0.05);
+border-left:5px solid #06b6d4;
+transition:0.3s;
+}
+
+.plan-card:hover{
+transform:translateY(-4px);
+}
+
+/* ================= BUTTON ================= */
+
+.btn-custom{
+border-radius:30px;
+padding:10px 25px;
+font-weight:500;
+transition:0.3s;
+}
+
+.btn-warning{
+background:linear-gradient(90deg,#f59e0b,#fbbf24);
+border:none;
+}
+
+.btn-success{
+background:linear-gradient(90deg,#10b981,#34d399);
+border:none;
+}
+
+.btn-primary{
+background:linear-gradient(90deg,#3b82f6,#6366f1);
+border:none;
+}
+
+.btn-custom:hover{
+transform:scale(1.05);
+box-shadow:0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* ================= ALERT ================= */
+
+.alert-danger{
+border-radius:15px;
+box-shadow:0 10px 30px rgba(239,68,68,0.2);
+}
+
+/* ================= ANIMATION ================= */
+
+@keyframes fadeIn{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+<div class="medical-card {% if prediction.result == 'High Risk' %}high{% else %}low{% endif %}">
+
+<h2 class="text-center mb-4">🩺 AI Health Recommendation</h2>
+
+<!-- ECG Monitor -->
+
+
+<div class="ecg-monitor mb-4">
+
+<div class="monitor-header">
+<span class="heart-icon">❤️</span>
+<span class="monitor-title">Live Heart Monitor</span>
+</div>
+
+<div class="ecg-wrapper">
+
+<svg class="ecg-svg" viewBox="0 0 800 120" >
+
+<polyline class="ecg-line"
+points="
+0,60
+50,60
+70,20
+90,100
+110,60
+180,60
+200,20
+220,100
+240,60
+300,60
+320,20
+340,100
+360,60
+800,60"/>
+
+</svg>
+
+</div>
+
+</div>
+
+<hr>
+
+<!-- Risk Meter -->
+
+<div class="text-center">
+
+<h5>Heart Disease Risk</h5>
+
+<div class="risk-meter" style="width:220px;margin:auto">
+
+<svg width="220" height="220">
+
+<circle cx="110" cy="110" r="95"
+stroke="#eee"
+stroke-width="15"
+fill="none"/>
+
+<circle cx="110" cy="110" r="95"
+stroke="{% if prediction.result == 'High Risk' %}#e63946{% else %}#2a9d8f{% endif %}"
+stroke-width="15"
+fill="none"
+stroke-dasharray="600"
+stroke-dashoffset="{{ 600 - (600 * prediction.probability / 100) }}"
+style="transition:stroke-dashoffset 1.5s ease"/>
+
+</svg>
+
+<h2 class="mt-3">{{ "%.0f"|format(prediction.probability) }}%</h2>
+
+<p>{{ prediction.result }}</p>
+
+</div>
+
+</div>
+
+<hr>
+
+<!-- AI Health Score Dashboard -->
+
+<h4 class="mt-4 mb-3">📊 AI Health Score</h4>
+
+<div class="row text-center">
+
+<div class="col-md-4">
+<div class="score-box">
+<h3>{{ 100 - prediction.probability|int }}</h3>
+<p>Heart Health Score</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="score-box">
+<h3>{{ prediction.probability|int }}</h3>
+<p>Risk Score</p>
+</div>
+</div>
+
+<div class="col-md-4">
+<div class="score-box">
+<h3>
+{% if prediction.probability > 80 %}
+Critical
+{% elif prediction.probability > 50 %}
+Moderate
+{% else %}
+Low
+{% endif %}
+</h3>
+<p>AI Severity</p>
+</div>
+</div>
+
+</div>
+
+<hr>
+
+<!-- AI Explanation -->
+
+<h4 class="mt-4">🧠 AI Explanation</h4>
+
+<div class="plan-card">
+
+{% if prediction.result == "High Risk" %}
+
+<p>
+
+The AI model detected patterns associated with **higher cardiovascular risk**.
+
+Possible contributing factors may include:
+
+• Elevated cholesterol levels  
+• Blood pressure abnormalities  
+• Reduced heart rate capacity  
+• Age-related cardiovascular stress  
+
+It is recommended to **consult a cardiologist and follow the suggested lifestyle plan**.
+
+</p>
+
+{% else %}
+
+<p>
+
+The AI model indicates **low probability of heart disease** based on the provided health metrics.
+
+Your cardiovascular indicators appear within safer ranges.
+
+Maintain your health by continuing **balanced diet, exercise and regular checkups**.
+
+</p>
+
+{% endif %}
+
+</div>
+
+<hr>
+
+
+<h4 class="mt-5">🧠 AI Decision Explanation</h4>
+
+<div class="plan-card">
+
+<p>
+The AI model analyzes multiple health indicators to estimate heart disease risk.
+Higher impact features contribute more strongly to the prediction.
+</p>
+
+<ul>
+
+<li><b>Age:</b> Cardiovascular risk increases with age.</li>
+
+<li><b>Blood Pressure:</b> High resting blood pressure stresses arteries.</li>
+
+<li><b>Cholesterol:</b> High cholesterol can cause artery blockage.</li>
+
+<li><b>Max Heart Rate:</b> Low exercise capacity may indicate heart issues.</li>
+
+<li><b>ST Depression:</b> Abnormal ECG changes during stress.</li>
+
+</ul>
+
+</div>
+
+
+<h4 class="mt-5">🧠 AI Feature Importance</h4>
+
+<div class="plan-card">
+
+<p>
+The AI model evaluates multiple clinical factors to estimate heart disease risk.
+The chart below shows how important each health feature is in the prediction.
+</p>
+
+<canvas id="featureChart"></canvas>
+
+</div>
+
+<!-- Charts -->
+
+<h4 class="mt-4">📈 Heart Health Analytics</h4>
+
+<div class="row">
+
+<div class="col-md-6">
+<canvas id="riskChart"></canvas>
+</div>
+
+<div class="col-md-6">
+<canvas id="healthChart"></canvas>
+</div>
+
+</div>
+
+<hr>
+
+<!-- Diet & Exercise -->
+
+<div class="row mt-4">
+
+<div class="col-md-6">
+
+<div class="plan-card">
+
+<h5>🥗 Diet Plan</h5>
+
+<p style="white-space:pre-line">{{ prediction.diet_plan }}</p>
+
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<div class="plan-card">
+
+<h5>🏃 Exercise Plan</h5>
+
+<p style="white-space:pre-line">{{ prediction.exercise_plan }}</p>
+
+</div>
+
+</div>
+
+</div>
+
+<hr>
+
+<!-- Emergency -->
+
+{% if prediction.emergency %}
+
+<div class="alert alert-danger text-center mt-4">
+
+🚨 <strong>High Heart Risk Detected</strong>
+
+<br><br>
+
+<a href="tel:102" class="btn btn-danger btn-custom">
+
+Call Emergency Ambulance
+
+</a>
+
+</div>
+
+{% endif %}
+
+<hr>
+
+<!-- Buttons -->
+
+<div class="text-center">
+
+<a href="https://www.google.com/maps/search/cardiologist+near+me/"
+target="_blank"
+class="btn btn-warning btn-custom m-2">
+
+Find Nearby Hospital
+
+</a>
+
+<a href="{{ url_for('download_report', id=prediction.id) }}"
+class="btn btn-success btn-custom m-2">
+
+Download Health Report
+
+</a>
+
+<a href="/dashboard"
+class="btn btn-primary btn-custom m-2">
+
+Back to Dashboard
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+// Feature Importance Chart
+
+new Chart(document.getElementById("featureChart"),{
+
+type:"bar",
+
+data:{
+
+labels:[
+"Age",
+"Resting Blood Pressure",
+"Cholesterol",
+"Max Heart Rate",
+"ST Depression"
+],
+
+datasets:[{
+
+label:"Impact on Heart Risk",
+
+data:[
+{{ feature_data["Age"] }},
+{{ feature_data["RestingBP"] }},
+{{ feature_data["Cholesterol"] }},
+{{ feature_data["MaxHR"] }},
+{{ feature_data["Oldpeak"] }}
+]
+
+}]
+
+},
+
+options:{
+scales:{
+y:{
+beginAtZero:true
+}
+}
+
+}
+
+})
+
+
+// Risk Chart
+
+new Chart(document.getElementById("riskChart"), {
+type: "doughnut",
+data: {
+labels: ["Risk","Safe"],
+datasets: [{
+data:[
+{{ prediction.probability }},
+{{ 100 - prediction.probability }}
+]
+}]
+}
+});
+
+
+// Health Chart
+
+new Chart(document.getElementById("healthChart"), {
+type: "bar",
+data:{
+labels:["Heart Health","Risk Level"],
+datasets:[{
+label:"Score",
+data:[
+{{ 100 - prediction.probability }},
+{{ prediction.probability }}
+]
+}]
+},
+options:{
+scales:{
+y:{
+beginAtZero:true,
+max:100
+}
+}
+}
+});
+
+});
+
+</script>
+
+
+</body>
+</html>

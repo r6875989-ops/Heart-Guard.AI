@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>HeartGuard AI Admin Dashboard</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+background:linear-gradient(135deg,#141e30,#243b55);
+color:white;
+font-family:'Poppins',sans-serif;
+}
+
+/* Cards */
+
+.card-stat{
+border-radius:20px;
+padding:25px;
+text-align:center;
+color:white;
+box-shadow:0 10px 30px rgba(0,0,0,0.3);
+transition:0.3s;
+}
+
+.card-stat:hover{
+transform:translateY(-6px);
+}
+
+.card-users{background:linear-gradient(135deg,#667eea,#764ba2);}
+.card-pred{background:linear-gradient(135deg,#43cea2,#185a9d);}
+.card-high{background:linear-gradient(135deg,#ff416c,#ff4b2b);}
+.card-low{background:linear-gradient(135deg,#11998e,#38ef7d);}
+
+/* Analytics Box */
+
+.analytics-box{
+background:rgba(255,255,255,0.1);
+padding:30px;
+border-radius:20px;
+margin-top:40px;
+backdrop-filter:blur(10px);
+}
+
+/* Gauge */
+
+.gauge-wrapper{
+position:relative;
+width:160px;
+margin:auto;
+}
+
+.gauge-text{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:22px;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+<h2 class="mb-4">❤️ HeartGuard AI Admin Dashboard</h2>
+
+<!-- STAT CARDS -->
+
+<div class="row g-4">
+
+<div class="col-md-3">
+<div class="card-stat card-users">
+<h5>Total Users</h5>
+<h2>{{ total_users }}</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-stat card-pred">
+<h5>Total Predictions</h5>
+<h2>{{ total_predictions }}</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-stat card-high">
+<h5>High Risk</h5>
+<h2>{{ high_risk }}</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card-stat card-low">
+<h5>Low Risk</h5>
+<h2>{{ low_risk }}</h2>
+</div>
+</div>
+
+</div>
+
+
+<!-- RISK GAUGE -->
+
+<div class="analytics-box text-center">
+
+<h4>Overall Heart Risk Percentage</h4>
+
+<div class="gauge-wrapper">
+
+<svg width="160" height="160">
+
+<circle cx="80" cy="80" r="70"
+stroke="#eee"
+stroke-width="12"
+fill="none"/>
+
+<circle cx="80" cy="80" r="70"
+stroke="#ff4b2b"
+stroke-width="12"
+fill="none"
+stroke-dasharray="440"
+stroke-dashoffset="{{ 440 - (440 * risk_percentage / 100) }}"
+style="transition:stroke-dashoffset 1s"/>
+
+</svg>
+
+<div class="gauge-text">{{ "%.0f"|format(risk_percentage) }}%</div>
+
+</div>
+
+</div>
+
+
+<!-- RISK DISTRIBUTION -->
+
+<div class="analytics-box">
+
+<h4>Risk Distribution</h4>
+
+<canvas id="riskChart"></canvas>
+
+</div>
+
+
+<!-- MONTHLY PREDICTION ANALYTICS -->
+
+<div class="analytics-box">
+
+<h4>Monthly Predictions</h4>
+
+<canvas id="monthlyChart"></canvas>
+
+</div>
+
+
+<!-- AGE GROUP ANALYTICS -->
+
+<div class="analytics-box">
+
+<h4>Top Risky Age Groups</h4>
+
+<canvas id="ageChart"></canvas>
+
+</div>
+
+
+<!-- CHOLESTEROL ANALYTICS -->
+
+<div class="analytics-box">
+
+<h4>Average Cholesterol Insights</h4>
+
+<canvas id="cholChart"></canvas>
+
+</div>
+
+
+<!-- RECENT PREDICTIONS -->
+
+<div class="analytics-box">
+
+<h4>Recent Predictions</h4>
+
+<table class="table table-hover text-white">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Age</th>
+<th>Result</th>
+<th>Probability</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for p in recent_predictions %}
+
+<tr>
+<td>{{ p.id }}</td>
+<td>{{ p.age }}</td>
+
+<td>
+{% if p.result == "High Risk" %}
+<span class="text-danger">{{ p.result }}</span>
+{% else %}
+<span class="text-success">{{ p.result }}</span>
+{% endif %}
+</td>
+
+<td>{{ "%.2f"|format(p.probability) }}%</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* Risk Distribution */
+
+new Chart(document.getElementById("riskChart"),{
+
+type:'doughnut',
+
+data:{
+labels:['High Risk','Low Risk'],
+datasets:[{
+data:[{{ high_risk }},{{ low_risk }}],
+backgroundColor:['#ff416c','#38ef7d']
+}]
+}
+
+});
+
+
+/* Monthly Predictions */
+
+new Chart(document.getElementById("monthlyChart"),{
+
+type:'bar',
+
+data:{
+labels:[{% for m in monthly_labels %}"{{ m }}",{% endfor %}],
+datasets:[{
+label:'Predictions',
+data:[{% for v in monthly_values %}{{ v }},{% endfor %}],
+backgroundColor:'#36d1dc'
+}]
+}
+
+});
+
+
+/* Age Group Risk */
+
+new Chart(document.getElementById("ageChart"),{
+
+type:'bar',
+
+data:{
+labels:[{% for a in age_labels %}"{{ a }}",{% endfor %}],
+datasets:[{
+label:'High Risk Count',
+data:[{% for v in age_values %}{{ v }},{% endfor %}],
+backgroundColor:'#ff6b6b'
+}]
+}
+
+});
+
+
+/* Cholesterol Insights */
+
+new Chart(document.getElementById("cholChart"),{
+
+type:'line',
+
+data:{
+labels:[{% for c in chol_labels %}"{{ c }}",{% endfor %}],
+datasets:[{
+label:'Average Cholesterol',
+data:[{% for v in chol_values %}{{ v }},{% endfor %}],
+borderColor:'#f9d423',
+fill:false
+}]
+}
+
+});
+
+</script>
+
+</body>
+</html>
